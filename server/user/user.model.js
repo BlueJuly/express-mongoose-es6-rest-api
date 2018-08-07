@@ -2,7 +2,7 @@ const Promise = require('bluebird');
 const mongoose = require('mongoose');
 const httpStatus = require('http-status');
 const APIError = require('../helpers/APIError');
-
+const bcrypt = require('bcrypt');
 /**
  * User Schema
  */
@@ -11,9 +11,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  password: {
+    type: String,
+    required: true
+  },
   mobileNumber: {
     type: String,
-    required: true,
+    required: false,
     match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
   },
   createdAt: {
@@ -28,13 +32,34 @@ const UserSchema = new mongoose.Schema({
  * - validations
  * - virtuals
  */
-
+UserSchema.pre('save', function save(next) {
+  const user = this;
+  if (!user.isModified('password')) { return next(); }
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) {
+      return next(err);
+    }
+    bcrypt.hash(user.password, salt, (hashError, hash) => {
+      if (hashError) {
+        return next(hashError);
+      }
+      user.password = hash;
+      next();
+      return true;
+    });
+    return true;
+  });
+  return true;
+});
 /**
  * Methods
  */
 UserSchema.method({
 });
 
+UserSchema.methods.comparePassword = function comparePassword(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 /**
  * Statics
  */
