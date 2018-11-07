@@ -27,5 +27,11 @@ module.exports = {
       username: Joi.string().required(),
       password: Joi.string().required()
     }
-  }
+  },
+
+  createOrg: {
+    body: {
+      orgName: Joi.string().required()
+    }
+  },
 };
