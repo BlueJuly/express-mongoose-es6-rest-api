@@ -83,13 +83,8 @@ OrgSchema.statics = {
           users: userObejctId
         }
       },
-      { multi: false },
-      function(err, numAffected){
-        if (err) {
-          console.log(err)
-        }
-      }
-    );
+      { multi: false }
+    ).exec();
   },
   /**
    * List orgs in descending order of 'createdAt' timestamp.
