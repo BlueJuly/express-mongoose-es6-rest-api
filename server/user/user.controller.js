@@ -45,13 +45,21 @@ function create(req, res, next) {
  * @returns {User}
  */
 function update(req, res, next) {
-  const user = req.user;
-  user.username = req.body.username;
-  user.mobileNumber = req.body.mobileNumber;
-
-  user.save()
-    .then(savedUser => res.json(savedUser))
-    .catch(e => next(e));
+  // const user = req.body;
+  // user.username = req.body.username;
+  // user.mobileNumber = req.body.mobileNumber;
+  console.log(req.file);
+  User.findOneAndUpdate({username:req.body.username},req.body, {new:true}, (err, user)=>{
+    if (err){
+      next(e);
+    }
+    else{
+      res.json(user);
+    }
+  });
+  // user.save()
+  //   .then(savedUser => res.json(savedUser))
+  //   .catch(e => next(e));
 }
 
 /**

@@ -2,13 +2,14 @@ const express = require('express');
 const validate = require('express-validation');
 const paramValidation = require('../../config/param-validation');
 const userCtrl = require('./user.controller');
-
+const Multer = require('multer');
+const Upload = Multer({dest: 'uploads/'});
 const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /api/users - Get list of users */
   .get(userCtrl.list)
-
+  .put(Upload.single('userProfileImage'), userCtrl.update)
   /** POST /api/users - Create new user */
   .post(validate(paramValidation.createUser), userCtrl.create);
 

@@ -32,6 +32,9 @@ async function login(req, res, next) {
           username: user.username
         });
       }
+      else{
+        return res.json("Wrong Password!");
+      }
     }
   } catch (error) {
     const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
