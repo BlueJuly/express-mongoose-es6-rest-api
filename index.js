@@ -7,13 +7,14 @@ const app = require('./config/express');
 const devtest = require('./devtest');
 // make bluebird default Promise
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
-devtest();
+//devtest();
 // plugin bluebird promise in mongoose
 mongoose.Promise = Promise;
 
 // connect to mongo db
 const mongoUri = config.mongo.host;
-mongoose.connect(mongoUri, { server: { socketOptions: { keepAlive: 1 } } });
+mongoose.connect(mongoUri, {useCreateIndex: true,
+  useNewUrlParser: true, server: { socketOptions: { keepAlive: 1 } } });
 mongoose.connection.on('error', () => {
   throw new Error(`unable to connect to database: ${mongoUri}`);
 });
