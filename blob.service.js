@@ -4,7 +4,7 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 const imageContainerName = 'images';
 const audioContainerName = 'audio';
 const videoContainerName = 'video';
-const documentContainerName = 'document';
+const documentContainerName = 'documents';
 let blobServiceClient;
 async function saveImage(blobName, filePath) {
   console.log('~~~~~~~~ dev test~~~~~~~~~~~');
@@ -17,22 +17,64 @@ async function saveImage(blobName, filePath) {
   if (!(await imageContainerClient.exists())) {
     const createImageContainerResponse = await imageContainerClient.create();
   }
-  // const audioContainerClient = await blobServiceClient.getContainerClient(audioContainerName);
-  // if (!(await audioContainerClient.exists())) {
-  //   const createAudioContainerResponse = await audioContainerClient.create();
-  // }
-  // const videoContainerClient = await blobServiceClient.getContainerClient(videoContainerName);
-  // if (!(await videoContainerClient.exists())) {
-  //   const createVideoContainerResponse = await videoContainerClient.create();
-  // }
-  // const documentContainerClient = await blobServiceClient.getContainerClient(documentContainerName);
-  // if (!(await documentContainerClient.exists())) {
-  //   const createDocContainerResponse = await documentContainerClient.create();
-  // }
-
   const blockBlobClient = imageContainerClient.getBlockBlobClient(blobName);
   const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
   console.log('uploadBlobResponse is:@@@@@@');
   console.log(uploadBlobResponse);
+  return 0;
 }
-module.exports = {saveImage};
+async function saveAudio(blobName, filePath) {
+  // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
+  // Quick start code goes here
+  if (!blobServiceClient) {
+    blobServiceClient = await BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+  }
+  const audioContainerClient = await blobServiceClient.getContainerClient(audioContainerName);
+  if (!(await audioContainerClient.exists())) {
+    const createAudioContainerResponse = await audioContainerClient.create();
+  }
+
+  const blockBlobClient = audioContainerClient.getBlockBlobClient(blobName);
+  const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
+  console.log('uploadBlobResponse is:@@@@@@');
+  console.log(uploadBlobResponse);
+  return 0;
+}
+async function saveVideo(blobName, filePath) {
+  // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
+  // Quick start code goes here
+  if (!blobServiceClient) {
+    blobServiceClient = await BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+  }
+  const videoContainerClient = await blobServiceClient.getContainerClient(videoContainerName);
+  if (!(await videoContainerClient.exists())) {
+    const createVideoContainerResponse = await videoContainerClient.create();
+  }
+  const blockBlobClient = videoContainerClient.getBlockBlobClient(blobName);
+  const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
+  console.log('uploadBlobResponse is:@@@@@@');
+  console.log(uploadBlobResponse);
+  return 0;
+}
+async function saveDocument(blobName, filePath) {
+  // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
+  // Quick start code goes here
+  if (!blobServiceClient) {
+    blobServiceClient = await BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+  }
+
+  const documentContainerClient = await blobServiceClient.getContainerClient(documentContainerName);
+  if (!(await documentContainerClient.exists())) {
+    const createDocContainerResponse = await documentContainerClient.create();
+  }
+
+  const blockBlobClient = documentContainerClient.getBlockBlobClient(blobName);
+  const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
+  console.log('uploadBlobResponse is:@@@@@@');
+  console.log(uploadBlobResponse);
+  return 0;
+}
+
+module.exports = {
+  saveImage, saveAudio, saveVideo, saveDocument
+};

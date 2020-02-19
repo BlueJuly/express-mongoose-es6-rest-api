@@ -7,7 +7,10 @@ const app = require('./config/express');
 const blobService = require('./blob.service');
 // make bluebird default Promise
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
-blobService.saveImage('testImage.png', 'uploads/image1.png');
+// blobService.saveImage('testImage1.png', 'uploads/image1.png');
+// blobService.saveAudio('testImage1.png', 'uploads/image1.png');
+// blobService.saveVideo('testImage1.png', 'uploads/image1.png');
+// blobService.saveDocument('testImage1.png', 'uploads/image1.png');
 // plugin bluebird promise in mongoose
 mongoose.Promise = Promise;
 
