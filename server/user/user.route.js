@@ -1,10 +1,12 @@
 const express = require('express');
 const validate = require('express-validation');
+const Multer = require('multer');
 const paramValidation = require('../../config/param-validation');
 const userCtrl = require('./user.controller');
-const Multer = require('multer');
-const Upload = Multer({dest: 'uploads/'});
+
+const Upload = Multer({ dest: 'uploads/' });
 const router = express.Router(); // eslint-disable-line new-cap
+
 
 router.route('/')
   /** GET /api/users - Get list of users */
