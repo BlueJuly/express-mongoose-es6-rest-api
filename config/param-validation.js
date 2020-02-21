@@ -5,7 +5,8 @@ module.exports = {
   createUser: {
     body: {
       username: Joi.string().required(),
-      mobileNumber: Joi.string().regex(/^[1-9][0-9]{9}$/).required()
+      password: Joi.string().required(),
+      mobileNumber: Joi.string().regex(/^[1-9][0-9]{9}$/)
     }
   },
 
@@ -26,5 +27,11 @@ module.exports = {
       username: Joi.string().required(),
       password: Joi.string().required()
     }
-  }
+  },
+
+  createOrg: {
+    body: {
+      orgName: Joi.string().required()
+    }
+  },
 };

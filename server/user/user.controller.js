@@ -9,7 +9,7 @@ function load(req, res, next, id) {
       req.user = user; // eslint-disable-line no-param-reassign
       return next();
     })
-    .catch(e => next(e));
+    .catch((err) => next(err));
 }
 
 /**
@@ -29,12 +29,13 @@ function get(req, res) {
 function create(req, res, next) {
   const user = new User({
     username: req.body.username,
+    password: req.body.password,
     mobileNumber: req.body.mobileNumber
   });
 
   user.save()
-    .then(savedUser => res.json(savedUser))
-    .catch(e => next(e));
+    .then((savedUser) => res.json(savedUser))
+    .catch((err) => next(err));
 }
 
 /**
@@ -43,14 +44,17 @@ function create(req, res, next) {
  * @property {string} req.body.mobileNumber - The mobileNumber of user.
  * @returns {User}
  */
-function update(req, res, next) {
-  const user = req.user;
-  user.username = req.body.username;
-  user.mobileNumber = req.body.mobileNumber;
-
-  user.save()
-    .then(savedUser => res.json(savedUser))
-    .catch(e => next(e));
+async function update(req, res, next) {
+  // const user = req.body;
+  // user.username = req.body.username;
+  // user.mobileNumber = req.body.mobileNumber;
+  console.log(req.file);
+  try {
+    let updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+    return res.json(updatedUser);
+  } catch (err) {
+    return next(err);
+  }
 }
 
 /**
@@ -62,8 +66,8 @@ function update(req, res, next) {
 function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
   User.list({ limit, skip })
-    .then(users => res.json(users))
-    .catch(e => next(e));
+    .then((users) => res.json(users))
+    .catch((err) => next(err));
 }
 
 /**
@@ -71,10 +75,12 @@ function list(req, res, next) {
  * @returns {User}
  */
 function remove(req, res, next) {
-  const user = req.user;
+  const { user } = req;
   user.remove()
-    .then(deletedUser => res.json(deletedUser))
-    .catch(e => next(e));
+    .then((deletedUser) => res.json(deletedUser))
+    .catch((err) => next(err));
 }
 
-module.exports = { load, get, create, update, list, remove };
+module.exports = {
+  load, get, create, update, list, remove
+};

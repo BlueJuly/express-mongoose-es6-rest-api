@@ -2,12 +2,12 @@ const jwt = require('jsonwebtoken');
 const httpStatus = require('http-status');
 const APIError = require('../helpers/APIError');
 const config = require('../../config/config');
-
+const User = require('../user/user.model');
 // sample user, used for authentication
-const user = {
-  username: 'react',
-  password: 'express'
-};
+// const user = {
+//   username: 'react',
+//   password: 'express'
+// };
 
 /**
  * Returns jwt token if valid username and password is provided
@@ -16,21 +16,31 @@ const user = {
  * @param next
  * @returns {*}
  */
-function login(req, res, next) {
+async function login(req, res, next) {
   // Ideally you'll fetch this from the db
   // Idea here was to show how jwt works with simplicity
-  if (req.body.username === user.username && req.body.password === user.password) {
-    const token = jwt.sign({
-      username: user.username
-    }, config.jwtSecret);
-    return res.json({
-      token,
-      username: user.username
-    });
+  try {
+    const user = await User.findOne({ username: req.body.username }).exec();
+    if (user) {
+      const isMatch = await user.comparePassword(req.body.password);
+      if (isMatch) {
+        const token = jwt.sign({
+          username: user.username
+        }, config.jwtSecret);
+        return res.json({
+          token,
+          username: user.username
+        });
+      }
+      else{
+        return res.json("Wrong Password!");
+      }
+    }
+  } catch (error) {
+    const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
+    return next(err);
   }
-
-  const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
-  return next(err);
+  return true;
 }
 
 /**
