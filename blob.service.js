@@ -1,13 +1,12 @@
 const AZURE_STORAGE_CONNECTION_STRING = 'DefaultEndpointsProtocol=https;AccountName=leondev;AccountKey=wpYx4gmQ6WiGnmLMOryHBJjx/4Hubjad9WB4lgYCuoshdEvO678iT3rSRUJ4PfC9AbaQrmVRU8pQsOD0ZyGzVw==;EndpointSuffix=core.windows.net';
-const { BlobServiceClient } = require('@azure/storage-blob');
-
+const { BlobServiceClient, StorageSharedKeyCredential, generateBlobSASQueryParameters, SASProtocol} = require('@azure/storage-blob');
+const AZURE_STORAGE_KEY = 'wpYx4gmQ6WiGnmLMOryHBJjx/4Hubjad9WB4lgYCuoshdEvO678iT3rSRUJ4PfC9AbaQrmVRU8pQsOD0ZyGzVw==';
 const imageContainerName = 'images';
 const audioContainerName = 'audio';
 const videoContainerName = 'video';
 const documentContainerName = 'documents';
 let blobServiceClient;
 async function saveImage(blobName, filePath) {
-  console.log('~~~~~~~~ dev test~~~~~~~~~~~');
   // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
   // Quick start code goes here
   if (!blobServiceClient) {
@@ -19,9 +18,9 @@ async function saveImage(blobName, filePath) {
   }
   const blockBlobClient = imageContainerClient.getBlockBlobClient(blobName);
   const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
-  console.log('uploadBlobResponse is:@@@@@@');
-  console.log(uploadBlobResponse);
-  return 0;
+  // console.log('uploadBlobResponse is:@@@@@@');
+  // console.log(uploadBlobResponse);
+  return uploadBlobResponse;
 }
 async function saveAudio(blobName, filePath) {
   // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
@@ -36,9 +35,9 @@ async function saveAudio(blobName, filePath) {
 
   const blockBlobClient = audioContainerClient.getBlockBlobClient(blobName);
   const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
-  console.log('uploadBlobResponse is:@@@@@@');
-  console.log(uploadBlobResponse);
-  return 0;
+  // console.log('uploadBlobResponse is:@@@@@@');
+  // console.log(uploadBlobResponse);
+  return uploadBlobResponse;
 }
 async function saveVideo(blobName, filePath) {
   // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
@@ -52,9 +51,9 @@ async function saveVideo(blobName, filePath) {
   }
   const blockBlobClient = videoContainerClient.getBlockBlobClient(blobName);
   const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
-  console.log('uploadBlobResponse is:@@@@@@');
-  console.log(uploadBlobResponse);
-  return 0;
+  // console.log('uploadBlobResponse is:@@@@@@');
+  // console.log(uploadBlobResponse);
+  return uploadBlobResponse;
 }
 async function saveDocument(blobName, filePath) {
   // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
@@ -70,11 +69,37 @@ async function saveDocument(blobName, filePath) {
 
   const blockBlobClient = documentContainerClient.getBlockBlobClient(blobName);
   const uploadBlobResponse = await blockBlobClient.uploadFile(filePath);
-  console.log('uploadBlobResponse is:@@@@@@');
-  console.log(uploadBlobResponse);
-  return 0;
+  // console.log('uploadBlobResponse is:@@@@@@');
+  // console.log(uploadBlobResponse);
+  return uploadBlobResponse;
 }
-
+async function getSASUrl(containerName, blobName) {
+  // console.log('Azure Blob storage v12 - JavaScript quickstart sample');
+  // Quick start code goes here
+  // if (!blobServiceClient) {
+  //   blobServiceClient = await BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+  // }
+  const sharedKeyCredential = new StorageSharedKeyCredential('leondev', AZURE_STORAGE_KEY);
+  const sas = generateBlobSASQueryParameters({
+    containerName,
+    blodName: blobName,
+    protocol: SASProtocol.HTTPS,
+    permissions: 'racwd',
+    startsOn: new Date(),
+    expiresOn: new Date(new Date().valueOf() + 86400)
+  }, sharedKeyCredential);
+  console.log("^^^^^^^^^^");
+  console.log(sas);
+  console.log("^^^^^^^^^^");
+  console.log(sas.toString());
+  // console.log('uploadBlobResponse is:@@@@@@');
+  // console.log(uploadBlobResponse);
+  return sas;
+}
 module.exports = {
-  saveImage, saveAudio, saveVideo, saveDocument
+  saveImage,
+  saveAudio,
+  saveVideo,
+  saveDocument,
+  getSASUrl
 };
