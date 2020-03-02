@@ -3,12 +3,7 @@ const {
   BlobServiceClient,
   StorageSharedKeyCredential,
   generateBlobSASQueryParameters,
-  SASProtocol,
-  ContainerURL,
-  BlockBlobURL,
-  SharedKeyCredential,
-  StorageURL,
-  ServiceURL
+  SASProtocol
 } = require('@azure/storage-blob');
 
 const AZURE_STORAGE_KEY = 'wpYx4gmQ6WiGnmLMOryHBJjx/4Hubjad9WB4lgYCuoshdEvO678iT3rSRUJ4PfC9AbaQrmVRU8pQsOD0ZyGzVw==';
@@ -84,7 +79,7 @@ async function saveDocument(blobName, filePath) {
   // console.log(uploadBlobResponse);
   return uploadBlobResponse;
 }
-async function getSAS(blobName, containerName) {
+async function getSASUrl(blobName, containerName) {
 
   const sharedKeyCredential = new StorageSharedKeyCredential('leondev', AZURE_STORAGE_KEY);
   const sas = generateBlobSASQueryParameters({
@@ -111,38 +106,14 @@ async function getSAS(blobName, containerName) {
   console.log(blockBlobClient);
   console.log("blob service client url^^^^^^^^^^");
   console.log(blockBlobClient.url);
-  return sas;
+  const blobSASUrl = `${blockBlobClient.url}?${sas.toString()}`;
+  return blobSASUrl;
 }
-async function getServiceUrl() {
-  const credentials = new StorageSharedKeyCredential('leondev', AZURE_STORAGE_KEY);
-  const pipeline = StorageURL.newPipeline(credentials);
-  const serviceURL = new ServiceURL('https://leondev.blob.core.windows.net', pipeline);
-  console.log('service URL is:');
-  console.log(serviceURL);
-  return serviceURL;
-}
-async function getBlockBlobUrl(blobName, containerName) {
-  const serviceURL = getServiceUrl();
-  const containerURL = ContainerURL.fromServiceURL(serviceURL, containerName);
-  const blockBlobURL = BlockBlobURL.fromContainerURL(containerURL, blobName);
-  console.log('blockBlobURL is:');
-  console.log(blockBlobURL);
-  return blockBlobURL;
-}
-async function createBlockBlobSASURL(blobName, containerName) {
-  const blockBlobURL = getBlockBlobUrl(blobName, containerName);
-  const blobSAS = getSAS(blobName, containerName);
-  const sasURL = `${blockBlobURL.url}?${blobSAS}`;
-  console.log('sasURL is:');
-  console.log(sasURL);
-  return sasURL;
-}
+
 module.exports = {
   saveImage,
   saveAudio,
   saveVideo,
   saveDocument,
-  getSAS,
-  getBlockBlobUrl,
-  createBlockBlobSASURL
+  getSASUrl
 };

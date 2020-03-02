@@ -9,7 +9,7 @@ const blobService = require('./blob.service');
 Promise = require('bluebird');
 // eslint-disable-line no-global-assign
 //blobService.saveImage('testImage.png', 'uploads/image1.png');
-blobService.getSAS('testImage.png', 'images');
+blobService.getSASUrl('testImage.png', 'images');
 // blobService.getBlockBlobUrl('testImage.png', 'images');
 // blobService.createBlockBlobSASURL('testImage.png', 'images');
 // plugin bluebird promise in mongoose
