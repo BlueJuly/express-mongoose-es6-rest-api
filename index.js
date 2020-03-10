@@ -6,12 +6,11 @@ const config = require('./config/config');
 const app = require('./config/express');
 const blobService = require('./blob.service');
 // make bluebird default Promise
+// eslint-disable-next-line no-global-assign
 Promise = require('bluebird');
 // eslint-disable-line no-global-assign
-//blobService.saveImage('testImage.png', 'uploads/image1.png');
-blobService.getSASUrl('testImage.png', 'images');
-// blobService.getBlockBlobUrl('testImage.png', 'images');
-// blobService.createBlockBlobSASURL('testImage.png', 'images');
+blobService.getBlobSASUrl('testImage.png', 'images');
+
 // plugin bluebird promise in mongoose
 mongoose.Promise = Promise;
 
