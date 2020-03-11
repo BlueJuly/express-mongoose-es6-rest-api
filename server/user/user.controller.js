@@ -49,14 +49,13 @@ async function update(req, res, next) {
   // user.username = req.body.username;
   // user.mobileNumber = req.body.mobileNumber;
   console.log(req.file);
-
-  console.log(req);
   try {
     const user = await User.findOne({ username: req.body.username });
     if (user) {
       if (req.file) {
-        blobService.saveBlob(req.file.originalname, req.file.path, 'images');
-      } else {
+         const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+         return res.json(saveBlobResponse);
+        } else {
         return res.json({ message: 'Upload file error!' });
       }
     } else {
@@ -65,7 +64,7 @@ async function update(req, res, next) {
     const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
 
     console.log(updatedUser);
-    return res.json(updatedUser);
+    
   } catch (err) {
     return next(err);
   }
