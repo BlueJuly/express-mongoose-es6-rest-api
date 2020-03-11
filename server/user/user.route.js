@@ -1,12 +1,20 @@
 const express = require('express');
 const validate = require('express-validation');
-const Multer = require('multer');
+const multer = require('multer');
 const paramValidation = require('../../config/param-validation');
 const userCtrl = require('./user.controller');
 
-const Upload = Multer({ dest: 'uploads/' });
-const router = express.Router(); // eslint-disable-line new-cap
 
+const storage = multer.diskStorage({
+  destination: function(req,file, cb){
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+const router = express.Router(); // eslint-disable-line new-cap
+const Upload = multer({ storage: storage });
 
 router.route('/')
   /** GET /api/users - Get list of users */

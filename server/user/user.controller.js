@@ -1,5 +1,5 @@
 const User = require('./user.model');
-
+const blobService = require('../../blob.service');
 /**
  * Load user and append to req.
  */
@@ -49,8 +49,22 @@ async function update(req, res, next) {
   // user.username = req.body.username;
   // user.mobileNumber = req.body.mobileNumber;
   console.log(req.file);
+
+  console.log(req);
   try {
-    let updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+    const user = await User.findOne({ username: req.body.username });
+    if (user) {
+      if (req.file) {
+        blobService.saveBlob(req.file.originalname, req.file.path, 'images');
+      } else {
+        return res.json({ message: 'Upload file error!' });
+      }
+    } else {
+      return res.json({ message: 'no such user' });
+    }
+    const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+
+    console.log(updatedUser);
     return res.json(updatedUser);
   } catch (err) {
     return next(err);
