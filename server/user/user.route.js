@@ -1,6 +1,7 @@
 const express = require('express');
 const validate = require('express-validation');
 const multer = require('multer');
+const crypto = require('crypto');
 const paramValidation = require('../../config/param-validation');
 const userCtrl = require('./user.controller');
 
@@ -10,7 +11,7 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' +file.originalname);
+    cb(null, `${crypto.randomBytes(18).toString('hex')  }-${ file.originalname}`);
   }
 });
 const router = express.Router(); // eslint-disable-line new-cap
