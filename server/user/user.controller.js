@@ -54,21 +54,19 @@ async function update(req, res, next) {
     if (user) {
       if (req.file) {
         const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+        const updatedUser = Object.assign(user, req.body);
         user.profileImage = req.file;
-       
-        //await user.updateOne(req.body);
         await user.save();
-        const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
-        return res.json(updatedUser);
+        //const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+        return res.json(user);
       } else {
+        //const Updateduserop = Object.assign(user, req.body);
         const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
         return res.json(updatedUser);
       }
     } else {
       return res.json({ message: 'no such user' });
-    }
-    //const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
-    
+    }    
   } catch (err) {
     return next(err);
   }
