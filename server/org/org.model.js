@@ -45,6 +45,7 @@ const OrgSchema = new mongoose.Schema({
 OrgSchema.pre('deleteOne', { document: true, query: false }, async function preDelete(next) {
   try {
     const deletingOrg = this;
+    // eslint-disable-next-line no-unused-vars
     const updateRes = await UserModel.updateMany({ org: deletingOrg._id }, { org: undefined });
     next();
   } catch (error) {

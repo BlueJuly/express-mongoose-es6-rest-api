@@ -1,5 +1,6 @@
 const Promise = require('bluebird');
 const mongoose = require('mongoose');
+
 const { Schema } = mongoose;
 const httpStatus = require('http-status');
 const bcrypt = require('bcrypt');

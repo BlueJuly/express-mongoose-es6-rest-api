@@ -10,11 +10,11 @@ async function run() {
     });
     const orgName = 'Mozzaz';
     const addUser = await Org.addUser(orgName, '5b6a6bedc508c03973e9302d');
-    console.log(addUser);
+    // console.log(addUser);
     mongoose.connection.dropDatabase();
     return addUser;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return error;
   }
 }

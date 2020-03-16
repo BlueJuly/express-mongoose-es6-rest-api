@@ -4,12 +4,12 @@ const debug = require('debug')('express-mongoose-es6-rest-api:index');
 // config should be imported before importing any other file
 const config = require('./config/config');
 const app = require('./config/express');
-const blobService = require('./blob.service');
+//  const blobService = require('./blob.service');
 // make bluebird default Promise
 // eslint-disable-next-line no-global-assign
 Promise = require('bluebird');
 // eslint-disable-line no-global-assign
-//blobService.getBlobSASUrl('testImage.png', 'images');
+// blobService.getBlobSASUrl('testImage.png', 'images');
 
 // plugin bluebird promise in mongoose
 mongoose.Promise = Promise;
