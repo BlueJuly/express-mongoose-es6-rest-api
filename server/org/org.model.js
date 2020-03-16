@@ -46,7 +46,6 @@ OrgSchema.pre('deleteOne', { document: true, query: false }, async function preD
   try {
     const deletingOrg = this;
     const updateRes = await UserModel.updateMany({ org: deletingOrg._id }, { org: undefined });
-    console.log(updateRes);
     next();
   } catch (error) {
     next(error);
@@ -79,18 +78,6 @@ OrgSchema.statics = {
       });
   },
 
-  // add new user to org by user objectID and org name
-  addUser(orgName, userObejctId) {
-    return this.update(
-      { orgName: orgName, users: { $ne: userObejctId } },
-      {
-        $push: {
-          users: userObejctId
-        }
-      },
-      { multi: false }
-    ).exec();
-  },
   /**
    * List orgs in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of orgs to be skipped.

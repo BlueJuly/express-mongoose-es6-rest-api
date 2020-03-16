@@ -47,9 +47,7 @@ function create(req, res, next) {
  */
 async function update(req, res, next) {
   // const user = req.body;
-  // user.username = req.body.username;
-  // user.mobileNumber = req.body.mobileNumber;
-  console.log(req.file);
+  // console.log(req.file);
   try {
     const user = await User.findOne({ username: req.body.username });
     if (user) {

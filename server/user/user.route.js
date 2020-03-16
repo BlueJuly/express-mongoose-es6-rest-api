@@ -7,15 +7,15 @@ const userCtrl = require('./user.controller');
 
 
 const storage = multer.diskStorage({
-  destination: function(req,file, cb){
+  destination(req, file, cb) {
     cb(null, 'uploads/');
   },
-  filename: function (req, file, cb) {
-    cb(null, `${crypto.randomBytes(18).toString('hex')  }-${ file.originalname}`);
+  filename(req, file, cb) {
+    cb(null, `${crypto.randomBytes(18).toString('hex')}-${file.originalname}`);
   }
 });
 const router = express.Router(); // eslint-disable-line new-cap
-const Upload = multer({ storage: storage });
+const Upload = multer({ storage });
 
 router.route('/')
   /** GET /api/users - Get list of users */

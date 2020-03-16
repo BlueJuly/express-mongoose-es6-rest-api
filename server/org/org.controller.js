@@ -9,7 +9,7 @@ function load(req, res, next, id) {
       req.org = org; // eslint-disable-line no-param-reassign
       return next();
     })
-    .catch(e => next(e));
+    .catch((e) => next(e));
 }
 
 /**
@@ -33,7 +33,7 @@ function create(req, res, next) {
 
   org.save()
     .then((savedOrg) => res.json(savedOrg))
-    .catch(e => next(e));
+    .catch((e) => next(e));
 }
 
 /**
@@ -43,8 +43,12 @@ function create(req, res, next) {
  * @returns {Org}
  */
 function update(req, res, next) {
-  console.log(req.body.orgName);
-  res.json(req.body);
+  // console.log(req.body.orgName);
+  try {
+    res.json(req.body);
+  } catch (error) {
+    next(error);
+  }
 }
 
 /**
@@ -56,8 +60,8 @@ function update(req, res, next) {
 function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
   OrgModel.list({ limit, skip })
-    .then(orgs => res.json(orgs))
-    .catch(e => next(e));
+    .then((orgs) => res.json(orgs))
+    .catch((e) => next(e));
 }
 
 /**
@@ -74,4 +78,6 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { load, get, create, update, list, remove };
+module.exports = {
+  load, get, create, update, list, remove
+};
