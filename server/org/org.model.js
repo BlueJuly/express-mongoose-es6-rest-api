@@ -2,7 +2,7 @@ const Promise = require('bluebird');
 
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
+// const {Schema} = mongoose;
 
 const httpStatus = require('http-status');
 
@@ -42,11 +42,15 @@ const OrgSchema = new mongoose.Schema({
  * - validations
  * - virtuals
  */
-OrgSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-  const deletingOrg = this;
-  const updateRes = await UserModel.updateMany({ org: deletingOrg._id }, { org: undefined });
-  console.log(updateRes);
-  next();
+OrgSchema.pre('deleteOne', { document: true, query: false }, async function preDelete(next) {
+  try {
+    const deletingOrg = this;
+    const updateRes = await UserModel.updateMany({ org: deletingOrg._id }, { org: undefined });
+    console.log(updateRes);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 /**
  * Methods

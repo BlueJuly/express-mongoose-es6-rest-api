@@ -54,26 +54,36 @@ async function update(req, res, next) {
     const user = await User.findOne({ username: req.body.username });
     if (user) {
       if (req.file) {
+        // eslint-disable-next-line no-unused-vars
         const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
-        const updatedUser = Object.assign(user, req.body);
+        // const updatedUser = Object.assign(user, req.body);
         user.profileImage = req.file;
         await user.save();
-        //const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+        // eslint-disable-next-line no-unused-vars
+        const updatedUser = await User.findOneAndUpdate(
+          { username: req.body.username },
+          req.body, { new: true }
+        );
         return res.json(user);
-      } else {
-        const orgtemp =  await User.findOne({ username: req.body.username }).populate('org').exec();
-        if (req.body.orgName) {
-           const org = await OrgModel.findOne({orgName:req.body.orgName});
-           req.body.org = org._id;
-           const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
-           return res.json(updatedUser);
-          }
-        const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+      }
+      // eslint-disable-next-line no-unused-vars
+      // const orgtemp = await User.findOne({ username: req.body.username }).populate('org').exec();
+      if (req.body.orgName) {
+        const org = await OrgModel.findOne({ orgName: req.body.orgName });
+        req.body.org = org._id;
+        const updatedUser = await User.findOneAndUpdate(
+          { username: req.body.username },
+          req.body, { new: true }
+        );
         return res.json(updatedUser);
       }
-    } else {
-      return res.json({ message: 'no such user' });
-    }    
+      const updatedUser = await User.findOneAndUpdate(
+        { username: req.body.username },
+        req.body, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.json({ message: 'no such user' });
   } catch (err) {
     return next(err);
   }

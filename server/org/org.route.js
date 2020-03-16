@@ -18,8 +18,8 @@ router.route('/:orgId')
   /** GET /api/orgs/:orgId - Get org */
   .get(orgCtrl.get)
 
-  /** PUT /api/orgs/:orgId - Update org */
-  //.put(validate(paramValidation.updateOrg), orgCtrl.update)
+/** PUT /api/orgs/:orgId - Update org */
+// .put(validate(paramValidation.updateOrg), orgCtrl.update)
 
   /** DELETE /api/orgs/:orgId - Delete org */
   .delete(orgCtrl.remove);

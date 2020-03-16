@@ -65,9 +65,13 @@ function list(req, res, next) {
  * @returns {Org}
  */
 async function remove(req, res, next) {
-  const org = await OrgModel.findOne({ orgName: req.body.orgName });
-  const deleteRes = await org.deleteOne();
-  res.json(deleteRes);
+  try {
+    const org = await OrgModel.findOne({ orgName: req.body.orgName });
+    const deleteRes = await org.deleteOne();
+    res.json(deleteRes);
+  } catch (error) {
+    next(error);
+  }
 }
 
 module.exports = { load, get, create, update, list, remove };
