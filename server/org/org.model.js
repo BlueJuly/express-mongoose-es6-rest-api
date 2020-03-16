@@ -8,7 +8,7 @@ const httpStatus = require('http-status');
 
 const APIError = require('../helpers/APIError');
 
-const User = require('../user/user.model');
+const UserModel = require('../user/user.model');
 
 // const bcrypt = require('bcrypt');
 /**
@@ -30,10 +30,6 @@ const OrgSchema = new mongoose.Schema({
     required: false,
     match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid email address.']
   },
-  users: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  }],
   createdAt: {
     type: Date,
     default: Date.now
@@ -42,11 +38,16 @@ const OrgSchema = new mongoose.Schema({
 
 /**
  * Add your
- * - pre-save hooks
+ * - pre-save hook
  * - validations
  * - virtuals
  */
-
+OrgSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+  const deletingOrg = this;
+  const updateRes = await UserModel.updateMany({ org: deletingOrg._id }, { org: undefined });
+  console.log(updateRes);
+  next();
+});
 /**
  * Methods
  */

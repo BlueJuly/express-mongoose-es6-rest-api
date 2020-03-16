@@ -1,5 +1,6 @@
 const User = require('./user.model');
 const blobService = require('../../blob.service');
+const OrgModel = require('../org/org.model');
 /**
  * Load user and append to req.
  */
@@ -60,7 +61,13 @@ async function update(req, res, next) {
         //const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
         return res.json(user);
       } else {
-        //const Updateduserop = Object.assign(user, req.body);
+        const orgtemp =  await User.findOne({ username: req.body.username }).populate('org').exec();
+        if (req.body.orgName) {
+           const org = await OrgModel.findOne({orgName:req.body.orgName});
+           req.body.org = org._id;
+           const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+           return res.json(updatedUser);
+          }
         const updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
         return res.json(updatedUser);
       }

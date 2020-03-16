@@ -1,5 +1,6 @@
 const Promise = require('bluebird');
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 const httpStatus = require('http-status');
 const bcrypt = require('bcrypt');
 const APIError = require('../helpers/APIError');
@@ -12,9 +13,17 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  email: {
+    type: String,
+    required: false
+  },
   password: {
     type: String,
     required: true
+  },
+  org: {
+    type: Schema.Types.ObjectId,
+    ref: 'Org'
   },
   mobileNumber: {
     type: String,
@@ -31,6 +40,10 @@ const UserSchema = new mongoose.Schema({
   age: {
     type: Number,
     required: false,
+  },
+  address: {
+    type: Object,
+    required: false
   },
   createdAt: {
     type: Date,

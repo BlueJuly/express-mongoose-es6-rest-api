@@ -1,10 +1,10 @@
-const Org = require('./org.model');
+const OrgModel = require('./org.model');
 
 /**
  * Load org and append to req.
  */
 function load(req, res, next, id) {
-  Org.get(id)
+  OrgModel.get(id)
     .then((org) => {
       req.org = org; // eslint-disable-line no-param-reassign
       return next();
@@ -27,12 +27,12 @@ function get(req, res) {
  * @returns {Org}
  */
 function create(req, res, next) {
-  const org = new Org({
+  const org = new OrgModel({
     orgName: req.body.orgName
   });
 
   org.save()
-    .then(savedOrg => res.json(savedOrg))
+    .then((savedOrg) => res.json(savedOrg))
     .catch(e => next(e));
 }
 
@@ -43,13 +43,8 @@ function create(req, res, next) {
  * @returns {Org}
  */
 function update(req, res, next) {
-  const org = req.org;
-  org.orgName = req.body.orgName;
-  org.mobileNumber = req.body.mobileNumber;
-
-  org.save()
-    .then(savedOrg => res.json(savedOrg))
-    .catch(e => next(e));
+  console.log(req.body.orgName);
+  res.json(req.body);
 }
 
 /**
@@ -60,7 +55,7 @@ function update(req, res, next) {
  */
 function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
-  Org.list({ limit, skip })
+  OrgModel.list({ limit, skip })
     .then(orgs => res.json(orgs))
     .catch(e => next(e));
 }
@@ -69,11 +64,10 @@ function list(req, res, next) {
  * Delete org.
  * @returns {Org}
  */
-function remove(req, res, next) {
-  const org = req.org;
-  org.remove()
-    .then(deletedOrg => res.json(deletedOrg))
-    .catch(e => next(e));
+async function remove(req, res, next) {
+  const org = await OrgModel.findOne({ orgName: req.body.orgName });
+  const deleteRes = await org.deleteOne();
+  res.json(deleteRes);
 }
 
 module.exports = { load, get, create, update, list, remove };

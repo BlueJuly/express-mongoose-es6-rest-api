@@ -10,7 +10,9 @@ router.route('/')
   .get(orgCtrl.list)
 
   /** POST /api/orgs - Create new org */
-  .post(validate(paramValidation.createOrg), orgCtrl.create);
+  .post(validate(paramValidation.createOrg), orgCtrl.create)
+  .put(orgCtrl.update)
+  .delete(orgCtrl.remove);
 
 router.route('/:orgId')
   /** GET /api/orgs/:orgId - Get org */
