@@ -23,12 +23,16 @@ const OrgSchema = new mongoose.Schema({
   mobileNumber: {
     type: String,
     required: false,
-    match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
+    // match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
   },
   email: {
     type: String,
     required: false,
-    match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid email address.']
+    // match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid email address.']
+  },
+  profileImage: {
+    type: Object,
+    required: false
   },
   createdAt: {
     type: Date,

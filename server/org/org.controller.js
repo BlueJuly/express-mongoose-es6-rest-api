@@ -1,5 +1,5 @@
 const OrgModel = require('./org.model');
-
+const blobService = require('../../blob.service');
 /**
  * Load org and append to req.
  */
@@ -42,12 +42,33 @@ function create(req, res, next) {
  * @property {string} req.body.mobileNumber - The mobileNumber of org.
  * @returns {Org}
  */
-function update(req, res, next) {
+async function update(req, res, next) {
   // console.log(req.body.orgName);
   try {
-    res.json(req.body);
+    const org = await OrgModel.findOne({ orgName: req.body.orgName });
+    if (org) {
+      if (req.file) {
+        // eslint-disable-next-line no-unused-vars
+        const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+        // const updatedUser = Object.assign(user, req.body);
+        org.profileImage = req.file;
+        await org.save();
+        // eslint-disable-next-line no-unused-vars
+        const updatedOrg = await OrgModel.findOneAndUpdate(
+          { orgName: req.body.orgName },
+          req.body, { new: true }
+        );
+        return res.json(updatedOrg);
+      }
+      const updatedOrg = await OrgModel.findOneAndUpdate(
+        { orgName: req.body.orgName },
+        req.body, { new: true }
+      );
+      return res.json(updatedOrg);
+    }
+    return res.json({ message: 'no such org' });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
