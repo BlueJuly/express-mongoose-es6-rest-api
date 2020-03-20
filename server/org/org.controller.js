@@ -26,11 +26,14 @@ function get(req, res) {
  * @property {string} req.body.mobileNumber - The mobileNumber of org.
  * @returns {Org}
  */
-function create(req, res, next) {
+async function create(req, res, next) {
   const org = new OrgModel({
     orgName: req.body.orgName
   });
-
+  if (req.file) {
+    org.profileImage = req.file;
+    const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+  }
   org.save()
     .then((savedOrg) => res.json(savedOrg))
     .catch((e) => next(e));

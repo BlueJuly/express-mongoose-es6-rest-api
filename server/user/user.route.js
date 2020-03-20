@@ -22,7 +22,7 @@ router.route('/')
   .get(userCtrl.list)
   .put(Upload.single('userProfileImage'), userCtrl.update)
   /** POST /api/users - Create new user */
-  .post(validate(paramValidation.createUser), userCtrl.create);
+  .post(Upload.single('userProfileImage'), userCtrl.create);
 
 router.route('/:userId')
   /** GET /api/users/:userId - Get user */

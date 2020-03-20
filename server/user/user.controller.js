@@ -27,13 +27,16 @@ function get(req, res) {
  * @property {string} req.body.mobileNumber - The mobileNumber of user.
  * @returns {User}
  */
-function create(req, res, next) {
+async function create(req, res, next) {
   const user = new User({
     username: req.body.username,
     password: req.body.password,
     mobileNumber: req.body.mobileNumber
   });
-
+  if (req.file) {
+    user.profileImage = req.file;
+    const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+  }
   user.save()
     .then((savedUser) => res.json(savedUser))
     .catch((err) => next(err));

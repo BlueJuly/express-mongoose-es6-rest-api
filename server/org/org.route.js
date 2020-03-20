@@ -22,7 +22,7 @@ router.route('/')
   /** GET /api/orgs - Get list of orgs */
   .get(orgCtrl.list)
   /** POST /api/orgs - Create new org */
-  .post(validate(paramValidation.createOrg), orgCtrl.create)
+  .post(Upload.single('orgProfileImage'), orgCtrl.create)
   .put(Upload.single('orgProfileImage'), orgCtrl.update)
   .delete(orgCtrl.remove);
 
