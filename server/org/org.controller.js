@@ -16,8 +16,20 @@ function load(req, res, next, id) {
  * Get org
  * @returns {Org}
  */
-function get(req, res) {
-  return res.json(req.org);
+async function get(req, res, next) {
+  try {
+    if (req.params.orgId) {
+      const org = await OrgModel.findOne({ _id: req.params.orgId });
+      return res.json(org);
+    }
+    if (req.body.orgName) {
+      const org = OrgModel.findOne({ username: req.body.orgName });
+      return res.json(org);
+    }
+    return res.json({message: 'no org id in request'});
+  } catch (error) {
+    return next(error);
+  }
 }
 
 /**

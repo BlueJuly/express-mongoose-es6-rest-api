@@ -17,8 +17,20 @@ function load(req, res, next, id) {
  * Get user
  * @returns {User}
  */
-function get(req, res) {
-  return res.json(req.user);
+async function get(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const user = await User.findOne({ _id: req.params.userId });
+      return res.json(user);
+    }
+    if (req.body.username) {
+      const user = User.findOne({ username: req.body.username });
+      return res.json(user);
+    }
+    return res.json({ message: 'no user id in request'});
+  } catch (error) {
+    return next(error);
+  }
 }
 
 /**
