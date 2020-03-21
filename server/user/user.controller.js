@@ -21,6 +21,8 @@ async function get(req, res, next) {
   try {
     if (req.params.userId) {
       const user = await User.findOne({ _id: req.params.userId });
+      const blobSASUrl = await blobService.getBlobSASUrl(user.profileImage.filename, 'images', 6000);
+      user.profileImage.blobUrl = blobSASUrl;
       return res.json(user);
     }
     if (req.body.username) {

@@ -20,6 +20,8 @@ async function get(req, res, next) {
   try {
     if (req.params.orgId) {
       const org = await OrgModel.findOne({ _id: req.params.orgId });
+      const blobSASUrl = await blobService.getBlobSASUrl(org.profileImage.filename, 'images', 6000);
+      org.profileImage.blobUrl = blobSASUrl;
       return res.json(org);
     }
     if (req.body.orgName) {
