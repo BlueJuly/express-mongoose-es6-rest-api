@@ -29,17 +29,17 @@ async function login(req, res, next) {
         }, config.jwtSecret);
         return res.json({
           token,
-          username: user.username
+          username: user.username,
+          userId: user.id
         });
       }
-
-      return res.json('Wrong Password!');
+      return res.status(500).json({ error: 'Authentication error' });
     }
+    return res.status(500).json({ error: 'Authentication error' });
   } catch (error) {
     const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
     return next(err);
   }
-  return true;
 }
 
 /**

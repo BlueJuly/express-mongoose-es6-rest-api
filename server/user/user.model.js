@@ -46,6 +46,18 @@ const UserSchema = new mongoose.Schema({
     type: Object,
     required: false
   },
+  mobileDevice: {
+    type: Object,
+    required: false,
+  },
+  tabletDevice: {
+    type: Object,
+    required: false,
+  },
+  webDevice: {
+    type: Object,
+    required: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now
