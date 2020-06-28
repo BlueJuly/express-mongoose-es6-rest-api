@@ -26,6 +26,18 @@ const UserSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'Org'
   },
+  userType: {
+    type: Schema.Types.String,
+    required: false
+  },
+  careTeam: {
+    type: Schema.Types.Array,
+    required: false
+  },
+  tiles: {
+    type: Schema.Types.Array,
+    required: false
+  },
   mobileNumber: {
     type: String,
     required: false

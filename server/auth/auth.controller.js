@@ -20,18 +20,17 @@ async function login(req, res, next) {
   // Ideally you'll fetch this from the db
   // Idea here was to show how jwt works with simplicity
   try {
-    const user = await User.findOne({ username: req.body.username }).exec();
+    let user = await User.findOne({ username: req.body.username }).exec();
     if (user) {
-      const isMatch = await user.comparePassword(req.body.password);
+      const isMatch = user.comparePassword(req.body.password);
       if (isMatch) {
-        const token = jwt.sign({
-          username: user.username
-        }, config.jwtSecret);
-        return res.json({
-          token,
+        const token = await jwt.sign({
           username: user.username,
-          userId: user.id
-        });
+          id: user._id
+        }, config.jwtSecret);
+        user = user.toJSON();
+        user.token = token;
+        return res.json(user);
       }
       return res.status(500).json({ error: 'Authentication error' });
     }
