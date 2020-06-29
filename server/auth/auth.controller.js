@@ -26,7 +26,7 @@ async function login(req, res, next) {
       if (isMatch) {
         const token = await jwt.sign({
           username: user.username,
-          id: user._id
+          id: user._id,
         }, config.jwtSecret);
         user = user.toJSON();
         user.token = token;

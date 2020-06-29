@@ -29,7 +29,7 @@ async function get(req, res, next) {
       const user = User.findOne({ username: req.body.username });
       return res.json(user);
     }
-    return res.json({ message: 'no user id in request'});
+    return res.json({ message: 'no user id in request' });
   } catch (error) {
     return next(error);
   }
@@ -66,39 +66,31 @@ async function update(req, res, next) {
   // const user = req.body;
   // console.log(req.file);
   try {
-    const user = await User.findOne({ username: req.body.username });
-    if (user) {
-      if (req.file) {
-        // eslint-disable-next-line no-unused-vars
-        const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
-        // const updatedUser = Object.assign(user, req.body);
-        user.profileImage = req.file;
-        await user.save();
-        // eslint-disable-next-line no-unused-vars
-        const updatedUser = await User.findOneAndUpdate(
-          { username: req.body.username },
-          req.body, { new: true }
-        );
-        return res.json(user);
-      }
-      // eslint-disable-next-line no-unused-vars
-      // const orgtemp = await User.findOne({ username: req.body.username }).populate('org').exec();
-      if (req.body.orgName) {
-        const org = await OrgModel.findOne({ orgName: req.body.orgName });
-        req.body.org = org._id;
-        const updatedUser = await User.findOneAndUpdate(
-          { username: req.body.username },
-          req.body, { new: true }
-        );
-        return res.json(updatedUser);
-      }
-      const updatedUser = await User.findOneAndUpdate(
-        { username: req.body.username },
-        req.body, { new: true }
-      );
-      return res.json(updatedUser);
+    let searchCondition; let updatedUser;
+    if (req.body.username) {
+      searchCondition = { username: req.body.username };
     }
-    return res.json({ message: 'no such user' });
+    if (req.params.userId) {
+      searchCondition = { _id: req.params.userId };
+    }
+    if (req.file) {
+      // eslint-disable-next-line no-unused-vars
+      const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+      req.body.profileImage = req.file;
+      // eslint-disable-next-line no-unused-vars
+    }
+    // eslint-disable-next-line no-unused-vars
+    // const orgtemp = await User.findOne({ username: req.body.username }).populate('org').exec();
+    if (req.body.orgName) {
+      const org = await OrgModel.findOne({ orgName: req.body.orgName });
+      req.body.org = org._id;
+    }
+    updatedUser = await User.findOneAndUpdate(
+      searchCondition,
+      req.body, { new: true }
+    );
+    // const temp = await user.save();
+    return res.json(updatedUser);
   } catch (err) {
     return next(err);
   }

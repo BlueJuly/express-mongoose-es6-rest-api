@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
     required: false
   },
   tiles: {
-    type: Schema.Types.Array,
+    type: Array,
     required: false
   },
   mobileNumber: {
