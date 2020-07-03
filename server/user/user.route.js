@@ -34,6 +34,24 @@ router.route('/:userId')
   /** DELETE /api/users/:userId - Delete user */
   .delete(userCtrl.remove);
 
+router.route('/:userId/tiles')
+  /** GET /api/users/:userId/tiles - Get a user tiles */
+  .get(userCtrl.getUserTiles)
+
+/** PUT /api/users/:userId - Update user */
+// .put(userCtrl.updateTiles)
+
+  /** DELETE /api/users/:userId - Delete user */
+  .delete(userCtrl.deleteUserTiles);
+
+router.route('/:userId/tiles/:tileId')
+
+  .get(userCtrl.getUserTileById)
+
+  .post(userCtrl.addUserTileById)
+
+  .delete(userCtrl.deleteUserTileById);
+
 /** Load user when API with userId route parameter is hit */
 router.param('userId', userCtrl.load);
 

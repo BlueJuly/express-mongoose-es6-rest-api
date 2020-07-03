@@ -1,6 +1,7 @@
 const User = require('./user.model');
 const blobService = require('../../blob.service');
 const OrgModel = require('../org/org.model');
+const tileCtrl = require('../tile/tile.controller');
 /**
  * Load user and append to req.
  */
@@ -96,6 +97,77 @@ async function update(req, res, next) {
   }
 }
 
+async function getUserTiles(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const tiles = [];
+      const user = await User.findOne({ _id: req.params.userId });
+      for (let index = 0; index < user.tiles.length; index++) {
+        const tile = await tileCtrl.getTileById(user.tiles[index]);
+        tiles.push(tile);
+      }
+      return res.json(tiles);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteUserTiles(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { tiles: [] }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function getUserTileById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.tileId) {
+      const tile = await tileCtrl.getTileById(req.params.tileId);
+      return res.json(tile);
+    }
+    return res.status(500).json({ error: 'no user id or tile id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function addUserTileById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.tileId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $push: { tiles: req.params.tileId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or tile id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function deleteUserTileById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.tileId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { tiles: req.params.tileId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or tile id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 /**
  * Get user list.
  * @property {number} req.query.skip - Number of users to be skipped.
@@ -121,5 +193,15 @@ function remove(req, res, next) {
 }
 
 module.exports = {
-  load, get, create, update, list, remove
+  load,
+  get,
+  create,
+  update,
+  list,
+  remove,
+  getUserTiles,
+  deleteUserTiles,
+  getUserTileById,
+  addUserTileById,
+  deleteUserTileById
 };

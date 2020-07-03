@@ -16,24 +16,28 @@ function load(req, res, next, id) {
  * Get tile
  * @returns {Tile}
  */
+async function getTileById(tileId) {
+  const tile = await TileModel.findOne({ _id: tileId });
+  const blobSASUrl = await blobService.getBlobSASUrl(tile.profileImage.filename, 'images', 6000);
+  tile.profileImage.blobUrl = blobSASUrl;
+  if (tile.resource && Array.isArray(tile.resource)) {
+    for (let index = 0; index < tile.resource.length; index++) {
+      const resourceBlobSASUrl = await blobService.getBlobSASUrl(tile.resource[index].filename, tile.type, 6000);
+      tile.resource[index].blobUrl = resourceBlobSASUrl;
+    }
+  }
+  return tile;
+}
 async function get(req, res, next) {
   try {
     if (req.params.tileId) {
-      const tile = await TileModel.findOne({ _id: req.params.tileId });
-      const blobSASUrl = await blobService.getBlobSASUrl(tile.profileImage.filename, 'images', 6000);
-      tile.profileImage.blobUrl = blobSASUrl;
-      if (tile.resource && Array.isArray(tile.resource)) {
-        for (let index = 0; index < tile.resource.length; index++) {
-          const resourceBlobSASUrl = await blobService.getBlobSASUrl(tile.resource[index].filename, tile.type, 6000);
-          tile.resource[index].blobUrl = resourceBlobSASUrl;
-        }
-      }
+      const tile = await getTileById(req.params.tileId);
       return res.json(tile);
     }
-    if (req.body.tileName) {
-      const tile = TileModel.findOne({ username: req.body.tileName });
-      return res.json(tile);
-    }
+    // if (req.body.tileName) {
+    //   const tile = TileModel.findOne({ username: req.body.tileName });
+    //   return res.json(tile);
+    // }
     return res.json({ message: 'no tile id in request' });
   } catch (error) {
     return next(error);
@@ -134,5 +138,5 @@ async function remove(req, res, next) {
 }
 
 module.exports = {
-  load, get, create, update, list, remove
+  load, get, create, update, list, remove, getTileById
 };
