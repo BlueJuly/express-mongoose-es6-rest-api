@@ -14,6 +14,16 @@ function load(req, res, next, id) {
     .catch((err) => next(err));
 }
 
+async function getUserById(id){
+  try {
+    const user = await User.findOne({ _id: id });
+    const blobSASUrl = await blobService.getBlobSASUrl(user.profileImage.filename, 'images', 6000);
+    user.profileImage.blobUrl = blobSASUrl;
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
 /**
  * Get user
  * @returns {User}
@@ -21,9 +31,7 @@ function load(req, res, next, id) {
 async function get(req, res, next) {
   try {
     if (req.params.userId) {
-      const user = await User.findOne({ _id: req.params.userId });
-      const blobSASUrl = await blobService.getBlobSASUrl(user.profileImage.filename, 'images', 6000);
-      user.profileImage.blobUrl = blobSASUrl;
+      const user = getUserById(req.params.userId); 
       return res.json(user);
     }
     if (req.body.username) {
@@ -168,6 +176,76 @@ async function deleteUserTileById(req, res, next) {
   }
 }
 
+async function getUserContacts(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const contacts = [];
+      const user = await User.findOne({ _id: req.params.userId });
+      for (let index = 0; index < user.contacts.length; index++) {
+        const contact = await getUserById(user.contacts[index]); 
+        contacts.push(contact);
+      }
+      return res.json(contacts);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteUserContacts(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { contacts: [] }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function getUserContactById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.contactId) {
+      const contact = await getUserById(req.params.contactId);
+      return res.json(contact);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function addUserContactById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.contactId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $push: { contacts: req.params.contactId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function deleteUserContactById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.contactId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { contacts: req.params.contactId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
 /**
  * Get user list.
  * @property {number} req.query.skip - Number of users to be skipped.
@@ -203,5 +281,10 @@ module.exports = {
   deleteUserTiles,
   getUserTileById,
   addUserTileById,
-  deleteUserTileById
+  deleteUserTileById,
+  getUserContacts,
+  deleteUserContacts,
+  getUserContactById,
+  addUserContactById,
+  deleteUserContactById
 };

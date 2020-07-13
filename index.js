@@ -19,6 +19,7 @@ const mongoUri = config.mongo.host;
 mongoose.connect(mongoUri, {
   useCreateIndex: true,
   useNewUrlParser: true,
+  useUnifiedTopology: true,
   server: { socketOptions: { keepAlive: 1 } }
 });
 mongoose.connection.on('error', () => {

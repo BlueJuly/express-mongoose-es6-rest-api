@@ -69,6 +69,9 @@ async function create(req, res, next) {
       });
     }
   }
+  if (req.body.type === 'website') {
+    tile.resource = req.body.tileResource;
+  }
   tile.save()
     .then((savedTile) => res.json(savedTile))
     .catch((e) => next(e));

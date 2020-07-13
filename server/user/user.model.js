@@ -34,6 +34,10 @@ const UserSchema = new mongoose.Schema({
     type: Schema.Types.Array,
     required: false
   },
+  contacts: {
+    type: Array,
+    required: false
+  },
   tiles: {
     type: Array,
     required: false
