@@ -31,7 +31,7 @@ const UserSchema = new mongoose.Schema({
     required: false
   },
   careTeam: {
-    type: Schema.Types.Array,
+    type: Array,
     required: false
   },
   contacts: {

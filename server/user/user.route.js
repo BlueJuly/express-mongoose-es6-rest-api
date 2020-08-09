@@ -29,7 +29,7 @@ router.route('/:userId')
   .get(userCtrl.get)
 
   /** PUT /api/users/:userId - Update user */
-  .put(validate(paramValidation.updateUser), userCtrl.update)
+  .put(validate(paramValidation.updateUser), Upload.single('userProfileImage'), userCtrl.update)
 
   /** DELETE /api/users/:userId - Delete user */
   .delete(userCtrl.remove);
@@ -54,20 +54,28 @@ router.route('/:userId/tiles/:tileId')
 router.route('/:userId/contacts')
   /** GET /api/users/:userId/tiles - Get a user tiles */
   .get(userCtrl.getUserContacts)
-
 /** PUT /api/users/:userId - Update user */
 // .put(userCtrl.updateTiles)
-
   /** DELETE /api/users/:userId - Delete user */
   .delete(userCtrl.deleteUserContacts);
 
 router.route('/:userId/contacts/:contactId')
-
   .get(userCtrl.getUserContactById)
-
   .post(userCtrl.addUserContactById)
-
   .delete(userCtrl.deleteUserContactById);
+
+router.route('/:userId/careteamMembers')
+  /** GET /api/users/:userId/tiles - Get a user tiles */
+  .get(userCtrl.getUserCareteamMembers)
+/** PUT /api/users/:userId - Update user */
+// .put(userCtrl.updateTiles)
+  /** DELETE /api/users/:userId - Delete user */
+  .delete(userCtrl.deleteUserCareteamMembers);
+
+router.route('/:userId/careteamMembers/:careteamMemberId')
+  .get(userCtrl.getUserCareteamMemberById)
+  .post(userCtrl.addUserCareteamMemberById)
+  .delete(userCtrl.deleteUserCareteamMemberById);
 
 /** Load user when API with userId route parameter is hit */
 router.param('userId', userCtrl.load);

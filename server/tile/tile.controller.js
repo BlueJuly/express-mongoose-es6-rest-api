@@ -69,6 +69,9 @@ async function create(req, res, next) {
       });
     }
   }
+  if (req.body.description) {
+    tile.description = req.body.description;
+  }
   if (req.body.type === 'website') {
     tile.resource = req.body.tileResource;
   }

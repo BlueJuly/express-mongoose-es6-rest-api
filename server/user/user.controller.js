@@ -246,6 +246,77 @@ async function deleteUserContactById(req, res, next) {
     return next(error);
   }
 }
+
+async function getUserCareteamMembers(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const contacts = [];
+      const user = await User.findOne({ _id: req.params.userId });
+      for (let index = 0; index < user.careTeam.length; index++) {
+        const contact = await getUserById(user.careTeam[index]); 
+        contacts.push(contact);
+      }
+      return res.json(contacts);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteUserCareteamMembers(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { careTeam: [] }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function getUserCareteamMemberById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.careteamMemberId) {
+      const contact = await getUserById(req.params.careteamMemberId);
+      return res.json(contact);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function addUserCareteamMemberById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.careteamMemberId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $push: { careTeam: req.params.careteamMemberId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function deleteUserCareteamMemberById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.careteamMemberId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { careTeam: req.params.careteamMemberId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
 /**
  * Get user list.
  * @property {number} req.query.skip - Number of users to be skipped.
@@ -286,5 +357,10 @@ module.exports = {
   deleteUserContacts,
   getUserContactById,
   addUserContactById,
-  deleteUserContactById
+  deleteUserContactById,
+  getUserCareteamMembers,
+  deleteUserCareteamMembers,
+  getUserCareteamMemberById,
+  addUserCareteamMemberById,
+  deleteUserCareteamMemberById
 };
