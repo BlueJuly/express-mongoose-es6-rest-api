@@ -1,5 +1,7 @@
 const Promise = require('bluebird');
 const mongoose = require('mongoose');
+
+const { Schema } = mongoose;
 const httpStatus = require('http-status');
 const bcrypt = require('bcrypt');
 const APIError = require('../helpers/APIError');
@@ -12,14 +14,65 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  email: {
+    type: String,
+    required: false
+  },
   password: {
     type: String,
     required: true
   },
+  org: {
+    type: Schema.Types.ObjectId,
+    ref: 'Org'
+  },
+  userType: {
+    type: Schema.Types.String,
+    required: false
+  },
+  careTeam: {
+    type: Array,
+    required: false
+  },
+  contacts: {
+    type: Array,
+    required: false
+  },
+  tiles: {
+    type: Array,
+    required: false
+  },
   mobileNumber: {
     type: String,
+    required: false
+  },
+  profileImage: {
+    type: Object,
     required: false,
-    match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
+  },
+  gender: {
+    type: String,
+    required: false,
+  },
+  age: {
+    type: Number,
+    required: false,
+  },
+  address: {
+    type: Object,
+    required: false
+  },
+  mobileDevice: {
+    type: Object,
+    required: false,
+  },
+  tabletDevice: {
+    type: Object,
+    required: false,
+  },
+  webDevice: {
+    type: Object,
+    required: false,
   },
   createdAt: {
     type: Date,

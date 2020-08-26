@@ -1,23 +1,37 @@
-const Org = require('./org.model');
-
+const OrgModel = require('./org.model');
+const blobService = require('../../blob.service');
 /**
  * Load org and append to req.
  */
 function load(req, res, next, id) {
-  Org.get(id)
+  OrgModel.get(id)
     .then((org) => {
       req.org = org; // eslint-disable-line no-param-reassign
       return next();
     })
-    .catch(e => next(e));
+    .catch((e) => next(e));
 }
 
 /**
  * Get org
  * @returns {Org}
  */
-function get(req, res) {
-  return res.json(req.org);
+async function get(req, res, next) {
+  try {
+    if (req.params.orgId) {
+      const org = await OrgModel.findOne({ _id: req.params.orgId });
+      const blobSASUrl = await blobService.getBlobSASUrl(org.profileImage.filename, 'images', 6000);
+      org.profileImage.blobUrl = blobSASUrl;
+      return res.json(org);
+    }
+    if (req.body.orgName) {
+      const org = OrgModel.findOne({ username: req.body.orgName });
+      return res.json(org);
+    }
+    return res.json({message: 'no org id in request'});
+  } catch (error) {
+    return next(error);
+  }
 }
 
 /**
@@ -26,14 +40,17 @@ function get(req, res) {
  * @property {string} req.body.mobileNumber - The mobileNumber of org.
  * @returns {Org}
  */
-function create(req, res, next) {
-  const org = new Org({
+async function create(req, res, next) {
+  const org = new OrgModel({
     orgName: req.body.orgName
   });
-
+  if (req.file) {
+    org.profileImage = req.file;
+    const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+  }
   org.save()
-    .then(savedOrg => res.json(savedOrg))
-    .catch(e => next(e));
+    .then((savedOrg) => res.json(savedOrg))
+    .catch((e) => next(e));
 }
 
 /**
@@ -42,14 +59,34 @@ function create(req, res, next) {
  * @property {string} req.body.mobileNumber - The mobileNumber of org.
  * @returns {Org}
  */
-function update(req, res, next) {
-  const org = req.org;
-  org.orgName = req.body.orgName;
-  org.mobileNumber = req.body.mobileNumber;
-
-  org.save()
-    .then(savedOrg => res.json(savedOrg))
-    .catch(e => next(e));
+async function update(req, res, next) {
+  // console.log(req.body.orgName);
+  try {
+    const org = await OrgModel.findOne({ orgName: req.body.orgName });
+    if (org) {
+      if (req.file) {
+        // eslint-disable-next-line no-unused-vars
+        const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+        // const updatedUser = Object.assign(user, req.body);
+        org.profileImage = req.file;
+        await org.save();
+        // eslint-disable-next-line no-unused-vars
+        const updatedOrg = await OrgModel.findOneAndUpdate(
+          { orgName: req.body.orgName },
+          req.body, { new: true }
+        );
+        return res.json(updatedOrg);
+      }
+      const updatedOrg = await OrgModel.findOneAndUpdate(
+        { orgName: req.body.orgName },
+        req.body, { new: true }
+      );
+      return res.json(updatedOrg);
+    }
+    return res.json({ message: 'no such org' });
+  } catch (error) {
+    return next(error);
+  }
 }
 
 /**
@@ -60,20 +97,25 @@ function update(req, res, next) {
  */
 function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
-  Org.list({ limit, skip })
-    .then(orgs => res.json(orgs))
-    .catch(e => next(e));
+  OrgModel.list({ limit, skip })
+    .then((orgs) => res.json(orgs))
+    .catch((e) => next(e));
 }
 
 /**
  * Delete org.
  * @returns {Org}
  */
-function remove(req, res, next) {
-  const org = req.org;
-  org.remove()
-    .then(deletedOrg => res.json(deletedOrg))
-    .catch(e => next(e));
+async function remove(req, res, next) {
+  try {
+    const org = await OrgModel.findOne({ orgName: req.body.orgName });
+    const deleteRes = await org.deleteOne();
+    res.json(deleteRes);
+  } catch (error) {
+    next(error);
+  }
 }
 
-module.exports = { load, get, create, update, list, remove };
+module.exports = {
+  load, get, create, update, list, remove
+};

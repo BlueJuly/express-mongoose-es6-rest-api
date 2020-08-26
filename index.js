@@ -4,20 +4,24 @@ const debug = require('debug')('express-mongoose-es6-rest-api:index');
 // config should be imported before importing any other file
 const config = require('./config/config');
 const app = require('./config/express');
-const blobService = require('./blob.service');
+//  const blobService = require('./blob.service');
 // make bluebird default Promise
-Promise = require('bluebird'); // eslint-disable-line no-global-assign
-// blobService.saveImage('testImage1.png', 'uploads/image1.png');
-// blobService.saveAudio('testImage1.png', 'uploads/image1.png');
-// blobService.saveVideo('testImage1.png', 'uploads/image1.png');
-// blobService.saveDocument('testImage1.png', 'uploads/image1.png');
+// eslint-disable-next-line no-global-assign
+Promise = require('bluebird');
+// eslint-disable-line no-global-assign
+// blobService.getBlobSASUrl('testImage.png', 'images');
+
 // plugin bluebird promise in mongoose
 mongoose.Promise = Promise;
 
 // connect to mongo db
 const mongoUri = config.mongo.host;
-mongoose.connect(mongoUri, {useCreateIndex: true,
-  useNewUrlParser: true, server: { socketOptions: { keepAlive: 1 } } });
+mongoose.connect(mongoUri, {
+  useCreateIndex: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  server: { socketOptions: { keepAlive: 1 } }
+});
 mongoose.connection.on('error', () => {
   throw new Error(`unable to connect to database: ${mongoUri}`);
 });

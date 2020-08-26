@@ -1,5 +1,7 @@
 const User = require('./user.model');
-
+const blobService = require('../../blob.service');
+const OrgModel = require('../org/org.model');
+const tileCtrl = require('../tile/tile.controller');
 /**
  * Load user and append to req.
  */
@@ -12,12 +14,34 @@ function load(req, res, next, id) {
     .catch((err) => next(err));
 }
 
+async function getUserById(id){
+  try {
+    const user = await User.findOne({ _id: id });
+    const blobSASUrl = await blobService.getBlobSASUrl(user.profileImage.filename, 'images', 6000);
+    user.profileImage.blobUrl = blobSASUrl;
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
 /**
  * Get user
  * @returns {User}
  */
-function get(req, res) {
-  return res.json(req.user);
+async function get(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const user = getUserById(req.params.userId); 
+      return res.json(user);
+    }
+    if (req.body.username) {
+      const user = User.findOne({ username: req.body.username });
+      return res.json(user);
+    }
+    return res.json({ message: 'no user id in request' });
+  } catch (error) {
+    return next(error);
+  }
 }
 
 /**
@@ -26,13 +50,16 @@ function get(req, res) {
  * @property {string} req.body.mobileNumber - The mobileNumber of user.
  * @returns {User}
  */
-function create(req, res, next) {
+async function create(req, res, next) {
   const user = new User({
     username: req.body.username,
     password: req.body.password,
     mobileNumber: req.body.mobileNumber
   });
-
+  if (req.file) {
+    user.profileImage = req.file;
+    const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+  }
   user.save()
     .then((savedUser) => res.json(savedUser))
     .catch((err) => next(err));
@@ -46,17 +73,250 @@ function create(req, res, next) {
  */
 async function update(req, res, next) {
   // const user = req.body;
-  // user.username = req.body.username;
-  // user.mobileNumber = req.body.mobileNumber;
-  console.log(req.file);
+  // console.log(req.file);
   try {
-    let updatedUser = await User.findOneAndUpdate({ username: req.body.username }, req.body, { new: true });
+    let searchCondition; let updatedUser;
+    if (req.body.username) {
+      searchCondition = { username: req.body.username };
+    }
+    if (req.params.userId) {
+      searchCondition = { _id: req.params.userId };
+    }
+    if (req.file) {
+      // eslint-disable-next-line no-unused-vars
+      const saveBlobResponse = await blobService.saveBlob(req.file.filename, req.file.path, 'images');
+      req.body.profileImage = req.file;
+      // eslint-disable-next-line no-unused-vars
+    }
+    // eslint-disable-next-line no-unused-vars
+    // const orgtemp = await User.findOne({ username: req.body.username }).populate('org').exec();
+    if (req.body.orgName) {
+      const org = await OrgModel.findOne({ orgName: req.body.orgName });
+      req.body.org = org._id;
+    }
+    updatedUser = await User.findOneAndUpdate(
+      searchCondition,
+      req.body, { new: true }
+    );
+    // const temp = await user.save();
     return res.json(updatedUser);
   } catch (err) {
     return next(err);
   }
 }
 
+async function getUserTiles(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const tiles = [];
+      const user = await User.findOne({ _id: req.params.userId });
+      for (let index = 0; index < user.tiles.length; index++) {
+        const tile = await tileCtrl.getTileById(user.tiles[index]);
+        tiles.push(tile);
+      }
+      return res.json(tiles);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteUserTiles(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { tiles: [] }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function getUserTileById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.tileId) {
+      const tile = await tileCtrl.getTileById(req.params.tileId);
+      return res.json(tile);
+    }
+    return res.status(500).json({ error: 'no user id or tile id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function addUserTileById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.tileId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $push: { tiles: req.params.tileId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or tile id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function deleteUserTileById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.tileId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { tiles: req.params.tileId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or tile id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getUserContacts(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const contacts = [];
+      const user = await User.findOne({ _id: req.params.userId });
+      for (let index = 0; index < user.contacts.length; index++) {
+        const contact = await getUserById(user.contacts[index]); 
+        contacts.push(contact);
+      }
+      return res.json(contacts);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteUserContacts(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { contacts: [] }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function getUserContactById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.contactId) {
+      const contact = await getUserById(req.params.contactId);
+      return res.json(contact);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function addUserContactById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.contactId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $push: { contacts: req.params.contactId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function deleteUserContactById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.contactId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { contacts: req.params.contactId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getUserCareteamMembers(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const contacts = [];
+      const user = await User.findOne({ _id: req.params.userId });
+      for (let index = 0; index < user.careTeam.length; index++) {
+        const contact = await getUserById(user.careTeam[index]); 
+        contacts.push(contact);
+      }
+      return res.json(contacts);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function deleteUserCareteamMembers(req, res, next) {
+  try {
+    if (req.params.userId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { careTeam: [] }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function getUserCareteamMemberById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.careteamMemberId) {
+      const contact = await getUserById(req.params.careteamMemberId);
+      return res.json(contact);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function addUserCareteamMemberById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.careteamMemberId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $push: { careTeam: req.params.careteamMemberId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
+async function deleteUserCareteamMemberById(req, res, next) {
+  try {
+    if (req.params.userId && req.params.careteamMemberId) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { careTeam: req.params.careteamMemberId } }, { new: true }
+      );
+      return res.json(updatedUser);
+    }
+    return res.status(500).json({ error: 'no user id or contact id provided in request' });
+  } catch (error) {
+    return next(error);
+  }
+}
 /**
  * Get user list.
  * @property {number} req.query.skip - Number of users to be skipped.
@@ -82,5 +342,25 @@ function remove(req, res, next) {
 }
 
 module.exports = {
-  load, get, create, update, list, remove
+  load,
+  get,
+  create,
+  update,
+  list,
+  remove,
+  getUserTiles,
+  deleteUserTiles,
+  getUserTileById,
+  addUserTileById,
+  deleteUserTileById,
+  getUserContacts,
+  deleteUserContacts,
+  getUserContactById,
+  addUserContactById,
+  deleteUserContactById,
+  getUserCareteamMembers,
+  deleteUserCareteamMembers,
+  getUserCareteamMemberById,
+  addUserCareteamMemberById,
+  deleteUserCareteamMemberById
 };
